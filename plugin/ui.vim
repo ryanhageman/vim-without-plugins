@@ -16,6 +16,12 @@ set ruler                           " Show cursor position
 set number                          " Show line numbers
 set relativenumber                  " Show relative line numbers
 
+augroup smart_relative_line_numbers
+  autocmd!
+  autocmd InsertEnter * set norelativenumber
+  autocmd InsertLeave * set relativenumber
+augroup END
+
 " Visual markers
 set showmatch                       " Highlight matching brackets
 set matchtime=2                     " Highlight time
