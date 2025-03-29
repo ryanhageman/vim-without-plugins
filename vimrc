@@ -13,10 +13,10 @@ let mapleader = "\<space>"
 let maplocalleader = "\<space>"
 
 " Syntax highlighting
-syntax on
+syntax on                               " Syntax Highlighting
 
 " Filetypes
-filetype plugin indent on
+filetype plugin indent on               " Filetype detection and language based indenting
 
 " Colors
 if has('termguicolors')
@@ -26,3 +26,6 @@ endif
 " Encoding
 set encoding=utf-8
 
+" Performance settings
+set lazyredraw                          " Don't redraw while running macros
+set ttyfast                             " Faster terminal connection
