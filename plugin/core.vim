@@ -13,3 +13,7 @@ set noswapfile                  " Skip making swap files
 " Mouse
 set mouse=a
 
+" Command Line Completion
+set wildmenu                    " Command Line completion menu
+set wildmode=longest:full,full  " Longest match first, then cycle
+set wildoptions=pum		" Completions in a popup menu
