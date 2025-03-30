@@ -12,6 +12,8 @@ xnoremap <space> <nop>
 let mapleader = "\<space>"
 let maplocalleader = "\<space>"
 
+inoremap jk <esc>h |              			" escape insert with jk
+
 " Syntax highlighting
 syntax on                               " Syntax Highlighting
 

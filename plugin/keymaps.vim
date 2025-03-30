@@ -11,8 +11,8 @@ nnoremap <leader>bp :bp<cr>
 nnoremap <leader>bn :bn<cr>
 
 " Files
-nnoremap <leader>fs :write<cr>              " file save (:write)
-nnoremap <leader>ff :e                      " find file 
+nnoremap <leader>fs :write<cr>|             " file save (:write)
+nnoremap <leader>ff :e|                     " find file 
 
 " Windows
 nnoremap <leader>ww <c-w>w                  " Swap Windows
