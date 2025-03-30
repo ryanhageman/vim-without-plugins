@@ -3,6 +3,12 @@
 " Navigation functions for Rails projects
 " ==========================================================================
 
+if exists('g:autoloaded_rails_navigation')
+  finish
+endif
+let g:autoloaded_rails_navigation = 1
+
+
 function! rails_navigation#setup()
   setlocal includeexpr=rails_navigation#rails_file_path(v:fname)
 
@@ -12,6 +18,7 @@ function! rails_navigation#setup()
   " Common Rails paths
   setlocal path+=app,app/models,app/controllers,app/views,app/helpers,config,lib,test,spec
 endfunction
+
 
 " -- Filename Transformations ----------------------------------------------
 
@@ -24,6 +31,7 @@ function! rails_navigation#filename_from(ruby_name)
   let filename = tolower(filename)
   return filename
 endfunction
+
 
 " -- Conditions? -----------------------------------------------------------
 
