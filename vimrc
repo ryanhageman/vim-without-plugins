@@ -12,10 +12,11 @@ xnoremap <space> <nop>
 let mapleader = "\<space>"
 let maplocalleader = "\<space>"
 
-inoremap jk <esc>h |              			" escape insert with jk
+" Escape with jk
+inoremap jk <esc>h
 
 " Syntax highlighting
-syntax on                               " Syntax Highlighting
+syntax on
 
 " Filetypes
 filetype plugin indent on               " Filetype detection and language based indenting
