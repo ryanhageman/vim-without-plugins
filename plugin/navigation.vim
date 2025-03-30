@@ -14,4 +14,12 @@ let g:netrw_liststyle = 3
 let g:netrw_browse_split = 0
 let g:netrw_winsize = 100
 
-nnoremap <leader>e :Explore<cr>
+function! ToggleNetrw()
+  if &filetype == 'netrw'
+    Rexplore
+  else
+    Explore
+  endif
+endfunction
+
+nnoremap <leader>e :call ToggleNetrw()<cr>
