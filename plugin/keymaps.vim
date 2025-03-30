@@ -6,9 +6,10 @@
 nnoremap <leader>ve :e $MYVIMRC<cr>
 
 " Buffer
-nnoremap <leader>bb :ls<cr>:b
-nnoremap <leader>bp :bp<cr>
-nnoremap <leader>bn :bn<cr>
+nnoremap <leader>bb :ls<cr>:b |             " list of open buffers
+nnoremap <leader>bp :bp<cr>|                " previous buffer
+nnoremap <leader>bn :bn<cr>|                " next buffer
+nnoremap <leader>bd :bd<cr>|                " delete the buffer
 
 " Files
 nnoremap <leader>fs :write<cr>|             " file save (:write)
