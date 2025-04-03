@@ -13,7 +13,7 @@ let mapleader = "\<space>"
 let maplocalleader = "\<space>"
 
 " Escape with jk
-inoremap jk <esc>h
+inoremap jk <esc>
 
 " Syntax highlighting
 syntax on
@@ -32,3 +32,4 @@ set encoding=utf-8
 " Performance settings
 set lazyredraw                          " Don't redraw while running macros
 set ttyfast                             " Faster terminal connection
+
