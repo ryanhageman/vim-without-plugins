@@ -1,7 +1,44 @@
+" ==========================================================================
+" Buffer List
+" ==========================================================================
+
 if exists('g:loaded_buffer_picker')
   finish
 endif
 let g:loaded_buffer_picker = 1
+
+" --------------------------------------------------------------------------
+
+function! s:Buffers()
+  let l:current_buffer_number = bufnr('%')
+  let l:raw_buffers = getbufinfo({'buflisted': 1})
+  let l:buffers = []
+
+  for buffer in l:raw_buffers
+    let l:buffer_info = {
+          \ 'number': buffer.bufnr,
+          \ 'name': buffer.name,
+          \ 'path': s:FormattedPath(buffer.name),
+          \ 'is_current': buffer.bufnr == l:current_buffer_number,
+          \ 'is_modified': getbufvar(buffer.bufnr, '&modified'),
+          \ }
+    call add(l:buffers, l:buffer_info)
+  endfor
+
+  return l:buffers
+endfunction
+
+function! s:FormattedPath(buffer_path)
+  if empty(a:buffer_path)
+    return '[No Name]'
+  endif
+
+  if a:buffer_path == getcwd()
+    return fnamemodify(a:buffer_path, ':t') . '/'
+  else
+    return fnamemodify(a:buffer_path, ':.')
+  endif
+endfunction
 
 " --------------------------------------------------------------------------
 
@@ -17,48 +54,22 @@ function! s:MenuWindow()
   setlocal norelativenumber
   setlocal cursorline
 
-  " Window Name
+  " Window name
   silent file [Buffer List]
 endfunction
 
 
-function! s:CurrentBuffers()
-  return getbufinfo({'buflisted': 1})
-endfunction
-
-
-function! s:ShortenedPath(buffer_path)
-  if empty(a:buffer_path)
-    return '[No Name]'
-  endif
-  
-  " Check if the path is the same as the current directory
-  if a:buffer_path == getcwd()
-    return fnamemodify(a:buffer_path, ':t') . '/'
-  else
-    return fnamemodify(a:buffer_path, ':.')
-  endif
-endfunction
-
-
-function! s:BufferListEntry(buffer, current_buffer)
-  let l:modified = getbufvar(a:buffer.bufnr, '&modified') ? '[+] ' : '    '
-  let l:active = a:buffer.bufnr == a:current_buffer ? ' *' : '  '
-  let l:path = s:ShortenedPath(a:buffer.name)
-  return printf("%3d %s%s%s", a:buffer.bufnr, l:modified, l:path, l:active)
-endfunction
-
-
-function! s:MenuContents(buffers, current_buffer)
+function! s:PopulateMenuWindow(buffers)
   let b:buffer_numbers = []
 
   for buffer in a:buffers
-    " Store buffer number for the line
-    call add(b:buffer_numbers, buffer.bufnr)
+    call add(b:buffer_numbers, buffer.number)
 
-    let l:line = s:BufferListEntry(buffer, a:current_buffer)
-    " Show buffer line
-    call append(line('$') - 1, l:line)
+    let l:modified_marker = buffer.is_modified ? '[+] ' : '    '
+    let l:current_buffer_marker = buffer.is_current ? ' *' : '  '
+    let l:line = printf("%3d %s%s%s", buffer.number, l:modified_marker, buffer.path, l:current_buffer_marker)
+
+    call append(line('$') -1, l:line)
   endfor
 
   " Remove empty last line
@@ -71,16 +82,14 @@ function! s:SelectBuffer()
   " Get current line
   let l:line_number = line('.')
 
-  " Only if there's valid data
   if exists('b:buffer_numbers') && l:line_number <= len(b:buffer_numbers)
-    " Grab the buffer number
+    " Get the buffer number
     let l:selected_buffer = get(b:buffer_numbers, l:line_number - 1, -1)
 
-    " Close the window
+    " Close the menu window and open the buffer
     if l:selected_buffer > 0
       bwipeout
 
-      " Switch to the new buffer
       execute 'buffer ' . l:selected_buffer
     endif
   endif
@@ -91,21 +100,25 @@ function! s:CancelSelection()
   bwipeout
 endfunction
 
+
+function! s:PluginKeymaps()
+  nnoremap <buffer> <silent> <cr> :call <sid>SelectBuffer()<cr>
+  nnoremap <buffer> <silent> <esc> :call <sid>CancelSelection()<cr>
+  nnoremap <buffer> <silent> q :call <sid>CancelSelection()<cr>
+endfunction
+
 " --------------------------------------------------------------------------
 
 function! BufferList()
-  let l:current_buffer = bufnr('%')
-  let l:buffers = s:CurrentBuffers()
-
+  let l:buffer_list = s:Buffers()
+  
   call s:MenuWindow()
-  call s:MenuContents(l:buffers, l:current_buffer)
+  call s:PopulateMenuWindow(l:buffer_list)
 
   " Jump to the top
   normal! gg
 
-  nnoremap <buffer> <silent> <cr> :call <sid>SelectBuffer()<cr>
-  nnoremap <buffer> <silent> <esc> :call <sid>CancelSelection()<cr>
-  nnoremap <buffer> <silent> q :call <sid>CancelSelection()<cr>
+  call s:PluginKeymaps()
 endfunction
 
 nnoremap <leader>bb :call BufferList()<cr>
