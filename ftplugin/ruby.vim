@@ -42,3 +42,4 @@ setlocal completeopt=menu,menuone,noselect,noinsert,preview
 
 " Rails Navigation Plugin
 call rails_navigation#setup()
+
