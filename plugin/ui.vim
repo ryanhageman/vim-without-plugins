@@ -5,12 +5,7 @@
 " Colors and themes
 set background=dark                 " Use dark background
 colorscheme retrobox                " Theme
-
-" Statusline
-set laststatus=2                    " Show status line
-set showcmd                         " Show partial commands
-set showmode                        " Show current mode
-set ruler                           " Show cursor position
+" colorscheme mardigras               " Theme
 
 " Lines
 set number                          " Show line numbers
