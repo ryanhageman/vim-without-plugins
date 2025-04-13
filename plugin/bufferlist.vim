@@ -3,7 +3,7 @@
 " ==========================================================================
 
 if exists('g:loaded_buffer_picker')
-  finish
+  " finish
 endif
 let g:loaded_buffer_picker = 1
 
@@ -85,8 +85,8 @@ function! s:populate_menu_window(buffers) abort
   for buffer in a:buffers
     call add(b:buffer_numbers, buffer.number)
 
-    let l:modified_marker = buffer.is_modified ? '[+] ' : '    '
-    let l:current_buffer_marker = buffer.is_current ? ' *' : '  '
+    let l:modified_marker = buffer.is_modified ? '  🏄' : '    '
+    let l:current_buffer_marker = buffer.is_current ? ' ☕' : '  '
     let l:line = printf("%3d %s%s%s", buffer.number, l:modified_marker, buffer.path, l:current_buffer_marker)
 
     call append(line('$') -1, l:line)
