@@ -12,3 +12,6 @@ setlocal nofoldenable
 " Snippets
 iabbrev xline " ---------------------------------------------------------------------------
 
+" Omnifunc
+setlocal omnifunc=syntaxcomplete#Complete
+
