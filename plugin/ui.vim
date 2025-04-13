@@ -3,6 +3,12 @@
 " ==========================================================================
 
 " Colors and themes
+augroup RetroboxOverrides
+    autocmd!
+    autocmd ColorScheme retrobox highlight Normal guibg=#282828 ctermbg=235
+    autocmd ColorScheme retrobox highlight Comment cterm=italic gui=italic
+augroup END
+
 set background=dark                 " Use dark background
 colorscheme retrobox                " Theme
 " colorscheme mardigras               " Theme
