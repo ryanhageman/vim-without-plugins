@@ -7,12 +7,16 @@ if exists('g:loaded_buffer_picker')
 endif
 let g:loaded_buffer_picker = 1
 
-" --------------------------------------------------------------------------
+" -- Commands and Keymaps --------------------------------------------------
 command! BufferList :call BufferList()
 nnoremap <leader>bb :BufferList<cr>
 
+" -- Script Variables ------------------------------------------------------
+let s:current_window_id = 0
 
-function! BufferList()
+" -- Global Functions ------------------------------------------------------
+function! BufferList() abort
+  let s:current_window_id = win_getid()
   let l:buffer_list = s:buffers()
   
   call s:create_menu_window()
@@ -25,8 +29,7 @@ function! BufferList()
 endfunction
 
 " -- Process Raw Buffer Info -----------------------------------------------
-
-function! s:buffers()
+function! s:buffers() abort
   let l:current_buffer_number = bufnr('%')
   let l:raw_buffers = getbufinfo({'buflisted': 1})
   let l:buffers = []
@@ -45,7 +48,7 @@ function! s:buffers()
   return l:buffers
 endfunction
 
-function! s:formatted_path(buffer_path)
+function! s:formatted_path(buffer_path) abort
   if empty(a:buffer_path)
     return '[No Name]'
   endif
@@ -59,7 +62,7 @@ endfunction
 
 " -- Buffer List Window ----------------------------------------------------
 
-function! s:create_menu_window()
+function! s:create_menu_window() abort
   botright 10new
 
   setlocal buftype=nofile
@@ -76,7 +79,7 @@ function! s:create_menu_window()
 endfunction
 
 
-function! s:populate_menu_window(buffers)
+function! s:populate_menu_window(buffers) abort
   let b:buffer_numbers = []
 
   for buffer in a:buffers
@@ -93,34 +96,58 @@ function! s:populate_menu_window(buffers)
   $delete _
 endfunction
 
-" -- Commands and Keymaps --------------------------------------------------
+" -- Script Commands and Keymaps --------------------------------------------------
 
-function! s:select_buffer()
-  " Get current line
-  let l:line_number = line('.')
-
-  if exists('b:buffer_numbers') && l:line_number <= len(b:buffer_numbers)
-    " Get the buffer number
-    let l:selected_buffer = get(b:buffer_numbers, l:line_number - 1, -1)
-
-    " Close the menu window and open the buffer
-    if l:selected_buffer > 0
-      bwipeout
-
-      execute 'buffer ' . l:selected_buffer
-    endif
+function! s:select_buffer() abort
+  if s:is_invalid_selection()
+    return
   endif
+
+  let l:selected_buffer = s:get_selected_buffer()
+
+  if s:is_invalid_buffer(l:selected_buffer)
+    return
+  endif
+
+  let l:buffer_to_load = l:selected_buffer
+
+  bwipeout
+
+  call s:return_to_current_window()
+
+  execute 'buffer ' . l:buffer_to_load
 endfunction
 
-
-function! s:cancel_selection()
+function! s:cancel_selection() abort
   bwipeout
 endfunction
 
 
-function! s:plugin_keymaps()
+function! s:plugin_keymaps() abort
   nnoremap <buffer> <silent> <cr> :call <sid>select_buffer()<cr>
   nnoremap <buffer> <silent> <esc> :call <sid>cancel_selection()<cr>
   nnoremap <buffer> <silent> q :call <sid>cancel_selection()<cr>
+endfunction
+
+" -- Boolean Functions -----------------------------------------------------
+
+function! s:is_invalid_selection() abort
+  return !exists('b:buffer_numbers') || line('.') > len(b:buffer_numbers)
+endfunction
+
+function! s:get_selected_buffer() abort
+  let l:line_number = line('.')
+
+  return get(b:buffer_numbers, l:line_number -1, -1)
+endfunction
+
+function! s:is_invalid_buffer(buffer_number) abort
+  return a:buffer_number <= 0
+endfunction
+
+function! s:return_to_current_window() abort
+  if win_id2win(s:current_window_id) > 0
+    call win_gotoid(s:current_window_id)
+  endif
 endfunction
 
