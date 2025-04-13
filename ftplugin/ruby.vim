@@ -18,6 +18,13 @@ let g:ruby_indent_hanging_elements = 1              " Indent elements in multi-l
 let g:ruby_indent_when_to_case = 1                  " Align 'when' with 'case' (Standard Ruby style)
 let g:ruby_indent_case_style = 'normal'             " Indent case bodies
 
+" Wrapping
+setlocal textwidth=80            " Maximum width for formatting with gq
+setlocal formatoptions-=t        " Disable auto-wrap text using textwidth
+setlocal formatoptions+=c        " Auto-wrap comments using textwidth when adding text
+setlocal formatoptions+=q        " Allow formatting of comments with gq
+setlocal formatoptions+=j        " Remove comment leader when joining lines
+
 " Folding
 setlocal foldmethod=syntax                          " Fold using syntax analysis
 setlocal nofoldenable                               " Open the file open, no autofolding
