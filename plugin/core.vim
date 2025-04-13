@@ -18,6 +18,6 @@ set mousehide                   " Hide mouse when typing
 " Command Line Completion
 set wildmenu                    " Command Line completion menu
 set wildmode=longest:full,full  " Longest match first, then cycle
-set wildoptions=pum		" Completions in a popup menu
+set wildoptions=pum         		" Completions in a popup menu
 set pumheight=10                " Completion menu height
 
