@@ -8,8 +8,25 @@ endif
 let g:loaded_buffer_picker = 1
 
 " --------------------------------------------------------------------------
+command! BufferList :call BufferList()
+nnoremap <leader>bb :BufferList<cr>
 
-function! s:Buffers()
+
+function! BufferList()
+  let l:buffer_list = s:buffers()
+  
+  call s:create_menu_window()
+  call s:populate_menu_window(l:buffer_list)
+
+  " Jump to the top
+  normal! gg
+
+  call s:plugin_keymaps()
+endfunction
+
+" -- Process Raw Buffer Info -----------------------------------------------
+
+function! s:buffers()
   let l:current_buffer_number = bufnr('%')
   let l:raw_buffers = getbufinfo({'buflisted': 1})
   let l:buffers = []
@@ -18,7 +35,7 @@ function! s:Buffers()
     let l:buffer_info = {
           \ 'number': buffer.bufnr,
           \ 'name': buffer.name,
-          \ 'path': s:FormattedPath(buffer.name),
+          \ 'path': s:formatted_path(buffer.name),
           \ 'is_current': buffer.bufnr == l:current_buffer_number,
           \ 'is_modified': getbufvar(buffer.bufnr, '&modified'),
           \ }
@@ -28,7 +45,7 @@ function! s:Buffers()
   return l:buffers
 endfunction
 
-function! s:FormattedPath(buffer_path)
+function! s:formatted_path(buffer_path)
   if empty(a:buffer_path)
     return '[No Name]'
   endif
@@ -40,9 +57,9 @@ function! s:FormattedPath(buffer_path)
   endif
 endfunction
 
-" --------------------------------------------------------------------------
+" -- Buffer List Window ----------------------------------------------------
 
-function! s:MenuWindow()
+function! s:create_menu_window()
   botright 10new
 
   setlocal buftype=nofile
@@ -59,7 +76,7 @@ function! s:MenuWindow()
 endfunction
 
 
-function! s:PopulateMenuWindow(buffers)
+function! s:populate_menu_window(buffers)
   let b:buffer_numbers = []
 
   for buffer in a:buffers
@@ -76,9 +93,9 @@ function! s:PopulateMenuWindow(buffers)
   $delete _
 endfunction
 
-" --------------------------------------------------------------------------
+" -- Commands and Keymaps --------------------------------------------------
 
-function! s:SelectBuffer()
+function! s:select_buffer()
   " Get current line
   let l:line_number = line('.')
 
@@ -96,30 +113,14 @@ function! s:SelectBuffer()
 endfunction
 
 
-function! s:CancelSelection()
+function! s:cancel_selection()
   bwipeout
 endfunction
 
 
-function! s:PluginKeymaps()
-  nnoremap <buffer> <silent> <cr> :call <sid>SelectBuffer()<cr>
-  nnoremap <buffer> <silent> <esc> :call <sid>CancelSelection()<cr>
-  nnoremap <buffer> <silent> q :call <sid>CancelSelection()<cr>
+function! s:plugin_keymaps()
+  nnoremap <buffer> <silent> <cr> :call <sid>select_buffer()<cr>
+  nnoremap <buffer> <silent> <esc> :call <sid>cancel_selection()<cr>
+  nnoremap <buffer> <silent> q :call <sid>cancel_selection()<cr>
 endfunction
-
-" --------------------------------------------------------------------------
-
-function! BufferList()
-  let l:buffer_list = s:Buffers()
-  
-  call s:MenuWindow()
-  call s:PopulateMenuWindow(l:buffer_list)
-
-  " Jump to the top
-  normal! gg
-
-  call s:PluginKeymaps()
-endfunction
-
-nnoremap <leader>bb :call BufferList()<cr>
 
