@@ -18,7 +18,7 @@ let s:current_window_id = 0
 function! BufferList() abort
   let s:current_window_id = win_getid()
   let l:buffer_list = s:buffers()
-  
+   
   call s:create_menu_window()
   call s:populate_menu_window(l:buffer_list)
 
@@ -102,7 +102,7 @@ function! s:select_buffer() abort
   if s:is_invalid_selection()
     return
   endif
-
+ 
   let l:selected_buffer = s:get_selected_buffer()
 
   if s:is_invalid_buffer(l:selected_buffer)
