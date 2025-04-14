@@ -24,6 +24,8 @@ setlocal formatoptions-=t        " Disable auto-wrap text using textwidth
 setlocal formatoptions+=c        " Auto-wrap comments using textwidth when adding text
 setlocal formatoptions+=q        " Allow formatting of comments with gq
 setlocal formatoptions+=j        " Remove comment leader when joining lines
+setlocal formatoptions+=r        " Auto-insert comment leader after <Enter>
+setlocal formatoptions+=o        " Auto-insert comment leader after o or O
 
 " Folding
 setlocal foldmethod=syntax                          " Fold using syntax analysis
