@@ -3,8 +3,9 @@
 " ==========================================================================
 
 if exists('g:loaded_buffer_picker')
-  " finish
+  finish
 endif
+
 let g:loaded_buffer_picker = 1
 
 " -- Commands and Keymaps --------------------------------------------------
