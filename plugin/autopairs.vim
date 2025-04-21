@@ -1,9 +1,13 @@
-if exists(g:loaded_autopairs)
+" ==========================================================================
+" Autopairs
+" ==========================================================================
+
+if exists('g:loaded_autopairs')
   finish
 endif
 
 let g:loaded_autopairs = 1
-" ---------------------------------------------------------------------------
+" --------------------------------------------------------------------------
 
 let s:pairs = {
   \ '(': ')',
@@ -39,7 +43,7 @@ function! s:is_inside_a_pair() abort
   return 0
 endfunction
 
-" -- Handlers ---------------------------------------------------------------
+" -- Handlers --------------------------------------------------------------
 function! s:backspace_handler() abort
   if s:is_inside_a_pair()
     return "\<BS>\<Delete>"
@@ -70,7 +74,7 @@ function! s:cursor_position() abort
 endfunction
 
 
-" -- Boolean Checks ---------------------------------------------------------
+" -- Boolean Checks --------------------------------------------------------
 
 function! s:is_cursor_at_line_edge() abort
   return s:is_beginning_of_line() || s:is_end_of_line()
@@ -95,7 +99,7 @@ function! s:is_char_already_present(char) abort
 endfunction
 
 
-" -- Turn it on -------------------------------------------------------------
+" -- Turn it on ------------------------------------------------------------
 
 function! s:collect_all_chars() abort
   let l:all_chars = {}
