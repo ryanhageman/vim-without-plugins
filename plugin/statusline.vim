@@ -65,20 +65,45 @@ set laststatus=2
 set showcmd
 set noshowmode
 
-set statusline=
-set statusline+=%{%StatusLine_Left_End()%}
-set statusline+=%{StatusLine_CurrentMode()}
-set statusline+=%{StatusLine_Divider()}
-set statusline+=%{%StatusLine_Filename()%}
-set statusline+=%{StatusLine_Divider()}
-set statusline+=%{%StatusLine_CursorPosition()%}
-set statusline+=%{StatusLine_Divider()}
-set statusline+=%{%StatusLine_OtherBufferInfo()%}
-set statusline+=%=
-set statusline+=%{%StatusLine_CurrentTime()%}
-set statusline+=%{StatusLine_Divider()}
-set statusline+=%{StatusLine_GitBranch()}
-set statusline+=%{StatusLine_Right_End()}
+function! StatusLine_Wide() abort
+  let l:statusline = ""
+  let l:statusline .= "%{%StatusLine_Left_End()%}"
+  let l:statusline .= StatusLine_ModeColor()
+  let l:statusline .= "%{StatusLine_CurrentMode()}"
+  let l:statusline .= "%#StatusLine#"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_FileAndPath()%}"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_CursorPosition()%}"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_OtherBufferInfo()%}"
+  let l:statusline .= "%="
+  let l:statusline .= "%{%StatusLine_CurrentDateTime()%}"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{StatusLine_GitBranch()}"
+  let l:statusline .= "%{StatusLine_Right_End()}"
+
+  return l:statusline
+endfunction
+
+function! StatusLine_Narrow() abort
+  let l:statusline = ""
+  let l:statusline .= "%{%StatusLine_Left_End()%}"
+  let l:statusline .= StatusLine_ModeColor()
+  let l:statusline .= "%{StatusLine_CurrentMode()}"
+  let l:statusline .= "%#StatusLine#"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_Filename()%}"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_CursorPosition()%}"
+  let l:statusline .= "%{StatusLine_Divider()}"
+  let l:statusline .= "%{%StatusLine_OtherBufferInfo()%}"
+  let l:statusline .= "%="
+  let l:statusline .= "%{%StatusLine_CurrentTime()%}"
+  let l:statusline .= "%{StatusLine_Right_End()}"
+
+  return l:statusline
+endfunction
 
 " --------------------------------------------------------------------------
 
@@ -98,8 +123,12 @@ function! StatusLine_CurrentMode() abort
   return get(s:READABLE_MODE_NAMES, mode(), mode())
 endfunction
 
-function! StatusLine_Filename() abort
+function! StatusLine_FileAndPath() abort
   return s:short_file_path () . s:modified_icon()
+endfunction
+
+function! StatusLine_Filename() abort
+  return s:filename() . s:modified_icon()
 endfunction
 
 function! StatusLine_CursorPosition() abort
@@ -110,19 +139,46 @@ function! StatusLine_OtherBufferInfo() abort
   return "%h%r"
 endfunction
 
-function! StatusLine_CurrentTime() abort
+function! StatusLine_CurrentDateTime() abort
   return strftime('%A %b %d - %I:%M %p')
+endfunction
+
+function! StatusLine_CurrentTime() abort
+  return strftime('%I:%M %p')
 endfunction
 
 function! StatusLine_GitBranch() abort
   return s:current_git_branch()
 endfunction
 
+function! StatusLine_AdjustWidth() abort
+  let width = winwidth(0)
+
+  if width > 80
+    setlocal statusline=%!StatusLine_Wide()
+  else 
+    setlocal statusline=%!StatusLine_Narrow()
+  endif
+endfunction
+
+augroup StatusLineAdjust
+  autocmd!
+  autocmd WinEnter,VimResized * call StatusLine_AdjustWidth()
+  autocmd BufWinEnter * call StatusLine_AdjustWidth()
+augroup END
+
+call StatusLine_AdjustWidth()
+
 " --------------------------------------------------------------------------
 
 function! s:short_file_path() abort
-  let path = expand('%:~:.')
-  return path =~# '^\[No Name\]$' ? '[No Name]' : path
+  let l:path = expand('%:~:.')
+  return l:path =~# '^\[No Name\]$' ? '[No Name]' : path
+endfunction
+
+function! s:filename() abort
+  let l:filename = expand('%:t')
+  return l:filename =~# '^\s*$' ? '[No Name]' : filename
 endfunction
 
 function! s:modified_icon() abort
@@ -199,3 +255,57 @@ function! s:git_branch_name(head_position_file) abort
     return strpart(l:first_line, 0, 7)
   endif
 endfunction
+
+" -- Color Modes ------------------------------------------------------------
+
+function! StatusLine_ModeColor() abort
+  return '%#' . s:mode_highlight_group() . '#'
+endfunction
+
+function! s:mode_highlight_group() abort
+  let l:mode = mode()
+
+  if l:mode =~# '^n'  " Normal modes
+    return 'StatusLineMode_Normal'
+  elseif l:mode =~# '^i' || l:mode =~# '^niI'  " Insert modes
+    return 'StatusLineMode_Insert'
+  elseif l:mode =~# '^v' || l:mode =~# '^V' || l:mode =~# '\^V'  " Visual modes
+    return 'StatusLineMode_Visual'
+  elseif l:mode =~# '^R' || l:mode =~# '^niR'  " Replace modes
+    return 'StatusLineMode_Replace'
+  elseif l:mode =~# '^c' || l:mode =~# '^r' || l:mode ==# '!'  " Command/prompt modes
+    return 'StatusLineMode_Command'
+  elseif l:mode =~# 't'  " Terminal modes
+    return 'StatusLineMode_Terminal'
+  else  " Other modes
+    return 'StatusLine'
+  endif
+endfunction
+
+function! s:get_statusline_background() abort
+  let l:cterm_background = synIDattr(synIDtrans(hlID('StatusLine')), 'bg', 'cterm')
+  let l:gui_background = synIDattr(synIDtrans(hlID('StatusLine')), 'bg', 'gui')
+
+  return {
+    \ 'cterm': l:cterm_background,
+    \ 'gui': l:gui_background
+    \}
+endfunction
+
+function! s:define_mode_highlight_groups() abort
+  let l:bg = s:get_statusline_background()
+
+  execute 'highlight StatusLineMode_Normal    guifg=#b8bb26 guibg=#504945 gui=bold,reverse'
+  execute 'highlight StatusLineMode_Insert    guifg=#83a598 guibg=#504945 gui=bold,reverse'
+  execute 'highlight StatusLineMode_Visual    guifg=#d3869b guibg=#504945 gui=bold,reverse'
+  execute 'highlight StatusLineMode_Replace   guifg=#fb4934 guibg=#504945 gui=bold,reverse'
+  execute 'highlight StatusLineMode_Command   guifg=#fabd2f guibg=#504945 gui=bold,reverse'
+  execute 'highlight StatusLineMode_Terminal  guifg=#8ec07c guibg=#504945 gui=bold,reverse'
+endfunction
+
+augroup StatusLineColors
+  autocmd!
+  autocmd VimEnter,ColorScheme * call s:define_mode_highlight_groups()
+augroup END
+
+call s:define_mode_highlight_groups()
