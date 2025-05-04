@@ -35,4 +35,8 @@ setlocal omnifunc=syntaxcomplete#Complete
 " Completion menu options
 setlocal completeopt=menu,menuone,noselect,noinsert,preview
 
-" ---------------------------------------------------------------------------
+" --------------------------------------------------------------------------
+
+" Enable wikilink navigation with gf
+setlocal includeexpr=notes#wikilink#current_file_path()
+setlocal suffixesadd+=.md
