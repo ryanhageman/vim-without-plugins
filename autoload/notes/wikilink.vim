@@ -57,6 +57,22 @@ function! notes#wikilink#current_file_path() abort
   return notes#wikilink#file_path(link_text)
 endfunction
 
+" Follows the wikilink under the cursor
+function! notes#wikilink#follow_wikilink() abort
+  " Check if cursor is on a wikilink
+  if !notes#wikilink#is_cursor_inside_wikilink()
+    " Not on a wikilink, fall back to Vim's default gf behavior
+    execute "normal! \<C-]>gf"
+    return
+  endif
+  
+  " Get the complete file path for the wikilink
+  let file_path = notes#wikilink#current_file_path()
+  
+  " Open or create the file
+  call s:open_or_create_file(file_path)
+endfunction
+
 " PRIVATE HELPERS ------------------------------------------------------------
 
 " Returns a dictionary with wikilink bracket information for current cursor position
@@ -77,6 +93,26 @@ endfunction
 " Returns position of the closing wikilink bracket or -1 if not found
 function! s:closing_bracket_position(line, cursor_position) abort
   return stridx(a:line, ']]', a:cursor_position)
+endfunction
+
+" Opens existing file or creates a new one with the given path
+function! s:open_or_create_file(file_path) abort
+  if empty(a:file_path)
+    echo "No valid file path found"
+    return
+  endif
+
+  " Try to find the file using Vim's file searching functionality
+  let found_file = findfile(a:file_path, '**')
+
+  if !empty(found_file)
+    " File exists, open it
+    execute "edit " . fnameescape(found_file)
+  else
+    " File doesn't exist, create a new buffer with this name
+    execute "edit " . fnameescape(a:file_path)
+    echo "Created new file: " . a:file_path
+  endif
 endfunction
 
 " Boolean functions (predicate functions)

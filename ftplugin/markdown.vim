@@ -38,5 +38,4 @@ setlocal completeopt=menu,menuone,noselect,noinsert,preview
 " --------------------------------------------------------------------------
 
 " Enable wikilink navigation with gf
-setlocal includeexpr=notes#wikilink#current_file_path()
-setlocal suffixesadd+=.md
+nnoremap <buffer> gf :call notes#wikilink#follow_wikilink()<cr>
