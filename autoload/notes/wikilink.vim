@@ -5,10 +5,10 @@
 " Returns true if cursor is positioned inside a wikilink [[...]]
 function! notes#wikilink#is_cursor_inside_wikilink() abort
   let brackets = s:wikilink_brackets()
-  
+
   " Cursor is inside wikilink if all conditions are met
-  return s:is_proper_bracket_order(brackets.opening_position, brackets.closing_position) && 
-      \ s:is_cursor_after_opening(brackets.cursor_position, brackets.opening_position) && 
+  return s:is_proper_bracket_order(brackets.opening_position, brackets.closing_position) &&
+      \ s:is_cursor_after_opening(brackets.cursor_position, brackets.opening_position) &&
       \ s:is_cursor_before_closing(brackets.cursor_position, brackets.closing_position)
 endfunction
 
@@ -18,28 +18,52 @@ function! notes#wikilink#wikilink_text() abort
   if !notes#wikilink#is_cursor_inside_wikilink()
     return ''
   endif
-  
+
   let brackets = s:wikilink_brackets()
-  
+
   " Extract the text between the brackets (excluding the brackets themselves)
   let wikilink_text = brackets.current_line[brackets.opening_position + 2 : brackets.closing_position - 1]
   return wikilink_text
 endfunction
 
+" Returns the target filename from a wikilink text, handling the pipe alias syntax
+" For [[filename]] returns filename
+" For [[filename|alias]] returns filename
+function! notes#wikilink#target_filename(wikilink_text) abort
+  if empty(a:wikilink_text)
+    return ''
+  endif
+
+  " Check if the wikilink contains a pipe character
+  let pipe_index = stridx(a:wikilink_text, '|')
+
+  if pipe_index != -1
+    " Return the part before the pipe (the actual filename)
+    return a:wikilink_text[0:pipe_index-1]
+  endif
+
+  " No pipe found, return the entire wikilink text
+  return a:wikilink_text
+endfunction
+
 " Returns a file path with the appropriate extension for the given wikilink text
 " Adds .md extension if not already present
+" Handles [[filename|alias]] syntax by using the part before the pipe
 function! notes#wikilink#file_path(wikilink_text) abort
   " Return empty string if input is empty
   if empty(a:wikilink_text)
     return ''
   endif
-  
+
+  " Get the target filename from the wikilink text
+  let target_filename = notes#wikilink#target_filename(a:wikilink_text)
+
   " Use as-is if already has extension, otherwise add .md
-  if s:has_file_extension(a:wikilink_text)
-    return a:wikilink_text
+  if s:has_file_extension(target_filename)
+    return target_filename
   endif
-  
-  return a:wikilink_text . '.md'
+
+  return target_filename . '.md'
 endfunction
 
 " Returns the file path for the wikilink under the cursor
@@ -49,10 +73,10 @@ function! notes#wikilink#current_file_path() abort
   if !notes#wikilink#is_cursor_inside_wikilink()
     return ''
   endif
-  
+
   " Get the wikilink text
   let link_text = notes#wikilink#wikilink_text()
-  
+
   " Convert to file path
   return notes#wikilink#file_path(link_text)
 endfunction
@@ -65,10 +89,10 @@ function! notes#wikilink#follow_wikilink() abort
     execute "normal! \<C-]>gf"
     return
   endif
-  
+
   " Get the complete file path for the wikilink
   let file_path = notes#wikilink#current_file_path()
-  
+
   " Open or create the file
   call s:open_or_create_file(file_path)
 endfunction
